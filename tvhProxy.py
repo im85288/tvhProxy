@@ -4,7 +4,7 @@ import time
 import os
 import requests
 from gevent.pywsgi import WSGIServer
-from flask import Flask, Response, request, jsonify, abort, render_template, json
+from flask import Flask, Response, request, jsonify, abort, render_template
 
 app = Flask(__name__)
 
@@ -19,22 +19,21 @@ config = {
     'streamProfile': os.environ.get('TVH_PROFILE') or 'pass'  # specifiy a stream profile that you want to use for adhoc transcoding in tvh, e.g. mp4
 }
 
-discoverData = {
-    'FriendlyName': 'tvhProxy',
-    'Manufacturer' : 'Silicondust',
-    'ModelNumber': 'HDTC-2US',
-    'FirmwareName': 'hdhomeruntc_atsc',
-    'TunerCount': int(config['tunerCount']),
-    'FirmwareVersion': '20150826',
-    'DeviceID': '12345678',
-    'DeviceAuth': 'test1234',
-    'BaseURL': '%s' % config['tvhProxyURL'],
-    'LineupURL': '%s/lineup.json' % config['tvhProxyURL']
-}
 
 @app.route('/discover.json')
 def discover():
-    return jsonify(discoverData)
+    return jsonify({
+        'FriendlyName': 'tvhProxy',
+        'Manufacturer' : 'Silicondust',
+        'ModelNumber': 'HDTC-2US',
+        'FirmwareName': 'hdhomeruntc_atsc',
+        'TunerCount': int(config['tunerCount']),
+        'FirmwareVersion': '20150826',
+        'DeviceID': '12345678',
+        'DeviceAuth': 'test1234',
+        'BaseURL': '%s' % config['tvhProxyURL'],
+        'LineupURL': '%s/lineup.json' % config['tvhProxyURL']
+    })
 
 
 @app.route('/lineup_status.json')
@@ -70,8 +69,7 @@ def lineup_post():
 @app.route('/')
 @app.route('/device.xml')
 def device():
-    data = json.dumps(discoverData, indent=2, separators=(', ', ': '))
-    return render_template('device.xml',data = data),{'Content-Type': 'application/xml'}
+    return render_template('device.xml',data = discover()),{'Content-Type': 'application/xml'}
 
 
 def _get_channels():
