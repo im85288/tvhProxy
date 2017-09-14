@@ -4,7 +4,7 @@ import time
 import os
 import requests
 from gevent.pywsgi import WSGIServer
-from flask import Flask, Response, request, jsonify, abort
+from flask import Flask, Response, request, jsonify, abort, render_template
 
 app = Flask(__name__)
 
@@ -24,6 +24,7 @@ config = {
 def discover():
     return jsonify({
         'FriendlyName': 'tvhProxy',
+        'Manufacturer' : 'Silicondust',
         'ModelNumber': 'HDTC-2US',
         'FirmwareName': 'hdhomeruntc_atsc',
         'TunerCount': int(config['tunerCount']),
@@ -64,6 +65,11 @@ def lineup():
 @app.route('/lineup.post')
 def lineup_post():
     return ''
+
+@app.route('/')
+@app.route('/device.xml')
+def device():
+    return render_template('device.xml',data = discover()),{'Content-Type': 'application/xml'}
 
 
 def _get_channels():
